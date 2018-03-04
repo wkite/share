@@ -59,13 +59,15 @@ sed -i 's/^tempest===18.0.0/tempest===17.2.0/' ~/requirements/upper-constraints.
 #11.stack用户创建local.conf文件，注意修改其中的HOST_IP变量为服务器的IP地址
 cat << EOF > ~/devstack/local.conf
 [[local|localrc]]
-DATABASE_PASSWORD=password
+DATABASE_PASSWORD=admin
 RABBIT_PASSWORD=stackrabbit
 SERVICE_PASSWORD=servicepassword
 ADMIN_PASSWORD=admin
 WSGI_MODE=mod_wsgi
+NOVA_USE_MOD_WSGI=False
 GIT_BASE=http://git.trystack.cn
 NOVNC_REPO=http://git.trystack.cn/kanaka/noVNC.git
+#LIBS_FROM_GIT+=neutron-lib #该变量有BUG
 HOST_IP=192.168.88.7
 SERVICE_IP_VERSION=4
 TARGET_BRANCH=stable/queens
@@ -81,22 +83,23 @@ mechanism_drivers = openvswitch
 tunnel_types=vxlan
 EOF
 
-#12.stack用户运行stack.sh
+#12.stack用户运行stack.sh，安装失败请排除错误继续运行
 ~/devstack/stack.sh
 
-#13.安装过程中失败处理
-##1.安装失败请先排除错误
-##2.执行sudo killall uwsgi防止再次安装时nova-api及nova-meta-api无响应
-##3.stack用户再次执行stack.sh，
-sudo killall uwsgi
-~/devstack/stack.sh
-
-#14.安装完成启用WEB服务，停止并禁用iptables服务
+#13.安装完成启用WEB服务，停止并禁用iptables服务
 sudo systemctl enable httpd
 sudo systemctl stop iptables
 sudo systemctl disable iptables
 
-#15.登录dashboard时可能会有报错，刷新页面即可
+#14.登录dashboard时可能会有报错，刷新页面即可
+
+#15.stack用户安装neutron-lib至所在目录
+cd ~
+sudo pip uninstall -y neutron-lib
+git clone http://git.trystack.cn/openstack/neutron-lib -b stable/queens
+cd ~/neutron-lib/
+sudo python setup.py develop
+sudo pip install .
 
 #16.安装PyCharm
 su - root
