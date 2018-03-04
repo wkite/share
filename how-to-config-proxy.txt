@@ -1,0 +1,25 @@
+﻿#YUM设置代理
+cat << EOF >> /etc/yum.conf
+proxy=http://HOST_IP:1080/
+EOF
+
+#GIT代理设置
+git config --global http.proxy http://HOST_IP:1080
+git config --global https.proxy http://HOST_IP:1080
+
+#PIP代理及源设置
+cat << EOF > ~/.pip/pip.conf
+[global]
+index-url = https://mirrors.ustc.edu.cn/pypi/web/simple
+format = columns
+proxy = http://HOST_IP:1080
+EOF
+
+
+#设置全局代理(不建议，可能会导致本地网络不能正常访问的问题)
+cat << EOF >> /etc/profile
+export http_proxy=HOST_IP:1080
+export https_proxy=HOST_IP:1080
+EOF
+#取消全局代理
+sed -i "s/^export http/#export http/" /etc/profile

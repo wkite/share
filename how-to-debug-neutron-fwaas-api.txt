@@ -1,0 +1,93 @@
+﻿Neutron 开发
+
+#neutron-server debug模式
+vim neutron/common/eventlet_utils.py
+https://github.com/wkite/neutron/commit/12a309833fea65e4bcae94b657b98bf9dc4df17c
+---    eventlet.monkey_patch()
++++    eventlet.monkey_patch(os=False, thread=False)
+
+#禁止检查agent状态(会减少打印的Debug信息，可选)
+neutron/plugins/ml2/plugin.py
+194        # self.add_agent_status_check_worker(self.agent_health_check)
+216       #self.add_periodic_dhcp_agent_status_check()
+
+#禁止生成默认防火墙组
+vim neutron_fwaas/db/firewall/v2/firewall_db_v2.py
+https://github.com/wkite/neutron_fwaas/commit/5ffc858d17c1370194a8d698023e2ac7c5083ec2
+https://github.com/wkite/neutron_fwaas/commit/c76bf2489f720fb8e09d2866e27ad690a6c156f1
+
+
+#Debug断点设置：
+vim  neutron_lib/api/attributes.py 
+124        def convert_values(
+
+vim  neutron_lib/api/validators/__init__.py
+626        msg_ip = validate_ip_address_or_none(data)
+
+vim  neutron_fwaas/db/firewall/firewall_db.py
+301        def _validate_fwr_src_dst_ip_version(self, fwr):
+
+
+#在指定目录安装开发包
+sudo python setup.py develop
+sudo pip install .
+
+
+#创建新数据库版本/备份数据库/升级数据库/还原数据库
+neutron-db-manage --subproject neutron-fwaas revision -m 'create_firewall_service_groups'
+mysqldump -uroot -ppassword neutron > ~/neutron-before-upgrade-heads.sql
+neutron-db-manage --subproject neutron-fwaas upgrade head
+
+
+#获取token
+source keystonerc_admin;TOKEN=$(openstack token issue | grep '^| id' | awk '{print$4}')
+source keystonerc_demo;TOKEN=$(openstack token issue | grep '^| id' | awk '{print$4}')
+
+##############ADDRESS GROUP
+##增CREATE
+curl -g -i -X POST http://172.16.25.46:9696/v2.0/address_groups -H "User-Agent: python-neutronclient" -H "Content-Type: application/json" -H "Accept: application/json" -H "X-Auth-Token: $TOKEN" -d '{"address_group":{"description":"description","ip_addresses":[{"ip_version":4,"ip_address":"1.1.1.1"},{"ip_version":6,"ip_address":"::1"}],"name":"create_test"}}'
+
+##查SELECT *
+curl -g -i -X GET http://172.16.25.46:9696/v2.0/address_groups -H "User-Agent: python-neutronclient" -H "Accept: application/json" -H "X-Auth-Token: $TOKEN"
+
+
+#重置数据库
+mysql -uroot -ppassword neutron < neutron_fwaas-after-add-records.sql
+
+##改UPDATE
+curl -g -i -X PUT http://172.16.25.46:9696/v2.0/address_groups/4ac530e8-04a7-42ec-89d5-874b4b9cc856 -H "User-Agent: python-neutronclient" -H "Content-Type: application/json" -H "Accept: application/json" -H "X-Auth-Token: $TOKEN" -d '{"address_group": {"name": "new_ADDR_GP_IPv4", "description": "new_ipv4_address_group", "ip_addresses":[{"ip_version":4,"ip_address":"2.2.2.2","timeout":null},{"ip_version":4,"ip_address":"2.2.3.0/24","timeout":null},{"ip_version":6,"ip_address":"::2","timeout":3600}]}}'
+
+##删DELETE
+curl -g -i -X DELETE http://172.16.25.46:9696/v2.0/address_groups/4ac530e8-04a7-42ec-89d5-874b4b9cc856 -H "User-Agent: python-neutronclient" -H "Content-Type: application/json" -H "Accept: application/json" -H "X-Auth-Token: $TOKEN"
+
+##查SELECT
+curl -g -i -X GET http://172.16.25.46:9696/v2.0/address_groups/4ac530e8-04a7-42ec-89d5-874b4b9cc856 -H "User-Agent: python-neutronclient" -H "Accept: application/json" -H "X-Auth-Token: $TOKEN"
+
+
+
+##############SERVICE GROUP
+##增CREATE
+curl -g -i -X POST http://172.16.25.46:9696/v2.0/service_groups -H "User-Agent: python-neutronclient" -H "Content-Type: application/json" -H "Accept: application/json" -H "X-Auth-Token: $TOKEN" -d '{"service_group":{"description":"description","ports":[{"port":"1,22-33","protocol":"tcp","timeout":"36000"}],"name":"Service_Group_1"}}'
+
+##查SELECT *
+curl -g -i -X GET http://172.16.25.46:9696/v2.0/service_groups -H "User-Agent: python-neutronclient" -H "Accept: application/json" -H "X-Auth-Token: $TOKEN"
+
+
+#重置数据库
+mysql -uroot -ppassword -e "drop database neutron;"
+mysql -uroot -ppassword -e "create database neutron;"
+mysql -uroot -ppassword neutron < ~/neutron-before-upgrade-heads.sql
+neutron-db-manage --subproject neutron-fwaas upgrade heads
+
+##改UPDATE
+mysql -uroot -ppassword neutron < ~/neutron-after-add-records-for-service-groups.sql
+
+curl -g -i -X PUT http://172.16.25.46:9696/v2.0/service_groups/7d383b9c-f838-41eb-a391-e253eb698a08 -H "User-Agent: python-neutronclient" -H "Content-Type: application/json" -H "Accept: application/json" -H "X-Auth-Token: $TOKEN" -d '{"service_group": {"name": "new_Service_group", "description": "new_service_group", "ports":[{"port":"22,80,8080-8088","protocol":"tcp","timeout":"36000"},{"port":"53,80,123,161","protocol":"udp","timeout":"10"},{"port":null,"protocol":"icmp","timeout":null}]}}'
+
+##删DELETE
+curl -g -i -X DELETE http://172.16.25.46:9696/v2.0/service_groups/7d383b9c-f838-41eb-a391-e253eb698a08 -H "User-Agent: python-neutronclient" -H "Content-Type: application/json" -H "Accept: application/json" -H "X-Auth-Token: $TOKEN"
+
+##查SELECT
+curl -g -i -X GET http://172.16.25.46:9696/v2.0/service_groups/7d383b9c-f838-41eb-a391-e253eb698a08 -H "User-Agent: python-neutronclient" -H "Accept: application/json" -H "X-Auth-Token: $TOKEN"
+
+
