@@ -57,6 +57,7 @@ git clone https://git.openstack.org/openstack/neutron -b stable/queens
 git clone https://git.openstack.org/openstack/neutron-fwaas -b stable/queens
 git clone https://git.openstack.org/openstack/neutron-fwaas-dashboard -b stable/queens
 git clone https://github.com/novnc/noVNC -b master
+cp -p ~/noVNC/vnc_lite.html ~/noVNC/vnc_auto.html
 
 #10.修改脚本,避免文件下载失败和模块依赖缺失导致安装中断
 sed -i 's/^    PYPI_ALTERNATIVE_URL=/    sudo yum install -y python-pip #PYPI_ALTERNATIVE_URL=/' ~/devstack/stack.sh

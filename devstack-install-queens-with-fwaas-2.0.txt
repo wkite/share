@@ -51,6 +51,8 @@ git clone http://git.trystack.cn/openstack-dev/devstack -b stable/queens
 git clone http://git.trystack.cn/openstack/requirements -b stable/queens
 git clone http://git.trystack.cn/openstack/neutron-fwaas -b stable/queens
 git clone http://git.trystack.cn/openstack/neutron-fwaas-dashboard -b stable/queens
+git clone http://git.trystack.cn/kanaka/noVNC -b master
+cp -p ~/noVNC/vnc_lite.html ~/noVNC/vnc_auto.html
 
 #10.修改脚本,避免文件下载失败和模块依赖缺失导致安装中断
 sed -i 's/^    PYPI_ALTERNATIVE_URL=/    sudo yum install -y python-pip #PYPI_ALTERNATIVE_URL=/' ~/devstack/stack.sh
@@ -66,7 +68,7 @@ ADMIN_PASSWORD=admin
 WSGI_MODE=mod_wsgi
 NOVA_USE_MOD_WSGI=False
 GIT_BASE=http://git.trystack.cn
-NOVNC_REPO=http://git.trystack.cn/kanaka/noVNC.git
+#NOVNC_REPO=http://git.trystack.cn/kanaka/noVNC.git
 #LIBS_FROM_GIT+=neutron-lib #该变量有BUG
 HOST_IP=192.168.88.7
 SERVICE_IP_VERSION=4
