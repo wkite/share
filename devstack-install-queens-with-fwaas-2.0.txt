@@ -1,14 +1,18 @@
 官方文档:https://docs.openstack.org/devstack/latest/
 
-#1.CentOS系统安装要求
+#0.CentOS系统安装要求
 #测试安装使用的是CentOS7.4
 #不建议使用最新内核，可能会有性能问题
 #虚拟机最低配置2核心6GB内存
 #需要安装图形化界面以运行PyCharm
 #语言建议选用英文以避免字符问题
 
-#2.禁用SELinux
+#1.禁用SELinux
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+
+#2.设定主机名，配置/etc/hosts文件。注意修改其中的服务器IP地址
+hostnamectl set-hostname queens.localdomain
+echo -e '192.168.88.7\tqueens queens.localdomain' >> /etc/hosts
 
 #3.安装依赖包
 yum -y install git deltarpm
