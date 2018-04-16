@@ -82,7 +82,7 @@ NEUTRON_CREATE_INITIAL_NETWORKS=False
 enable_plugin neutron-fwaas http://git.trystack.cn/openstack/neutron-fwaas
 enable_plugin neutron-fwaas-dashboard http://git.trystack.cn/openstack/neutron-fwaas-dashboard
 ENABLED_SERVICES+=,q-fwaas-v2
-[[post-config|/$Q_PLUGIN_CONF_FILE]]
+[[post-config|/\$Q_PLUGIN_CONF_FILE]]
 [ml2]
 mechanism_drivers = openvswitch
 [agent]
