@@ -18,16 +18,14 @@ echo -e '192.168.88.7\tqueens queens.localdomain' >> /etc/hosts
 yum -y install git deltarpm
 
 #4.安装源并修改配置以提高安装效率(可选)
-chattr -i /etc/yum.repos.d/rdo*.repo
-chattr -i /etc/yum.repos.d/epel.repo
-yum -y install epel-release https://rdoproject.org/repos/rdo-release.rpm
-sed -i 's/mirror.centos.org/mirrors.ustc.edu.cn/g' /etc/yum.repos.d/rdo*.repo
+yum -y install epel-release centos-release-openstack-queens
+rm -f /etc/yum.repos.d/CentOS-Ceph*.repo
+sed -i 's/mirror.centos.org/mirrors.ustc.edu.cn/g' /etc/yum.repos.d/CentOS-OpenStack-queens.repo
+sed -i 's+mirror.centos.org/$contentdir+mirrors.ustc.edu.cn/centos+' /etc/yum.repos.d/CentOS-QEMU-EV.repo
 sed -i 's+download.fedoraproject.org/pub+mirrors.ustc.edu.cn+' /etc/yum.repos.d/epel.repo
 sed -i 's/^#baseurl/baseurl/' /etc/yum.repos.d/epel.repo
 sed -i 's/^metalink/#metalink/' /etc/yum.repos.d/epel.repo
 sed -i 's/^mirrorlist/#mirrorlist/' /etc/yum.repos.d/epel.repo
-chattr +i /etc/yum.repos.d/rdo*.repo
-chattr +i /etc/yum.repos.d/epel.repo
 
 #5.禁用会干扰OpenStack的服务并重启系统
 systemctl disable firewalld NetworkManager
@@ -58,8 +56,6 @@ EOF
 cd ~
 git clone http://git.trystack.cn/openstack-dev/devstack -b stable/queens
 git clone http://git.trystack.cn/openstack/requirements -b stable/queens
-git clone http://git.trystack.cn/openstack/neutron-fwaas -b stable/queens
-git clone http://git.trystack.cn/openstack/neutron-fwaas-dashboard -b stable/queens
 git clone http://git.trystack.cn/kanaka/noVNC -b master
 cp -p ~/noVNC/vnc_lite.html ~/noVNC/vnc_auto.html
 
@@ -83,8 +79,8 @@ TARGET_BRANCH=stable/queens
 disable_service tempest etcd3 dstat c-sch c-api c-vol
 DOWNLOAD_DEFAULT_IMAGES=False
 NEUTRON_CREATE_INITIAL_NETWORKS=False
-enable_plugin neutron-fwaas http://git.trystack.cn/openstack/neutron-fwaas
-enable_plugin neutron-fwaas-dashboard http://git.trystack.cn/openstack/neutron-fwaas-dashboard
+enable_plugin neutron-fwaas http://git.trystack.cn/openstack/neutron-fwaas stable/queens
+enable_plugin neutron-fwaas-dashboard http://git.trystack.cn/openstack/neutron-fwaas-dashboard stable/queens
 ENABLED_SERVICES+=,q-fwaas-v2
 [[post-config|/\$Q_PLUGIN_CONF_FILE]]
 [ml2]
@@ -111,15 +107,15 @@ sudo pip uninstall -y neutron-lib
 git clone http://git.trystack.cn/openstack/neutron-lib -b stable/queens
 cd ~/neutron-lib/
 sudo python setup.py develop
-sudo pip install .
+sudo python setup.py install
 
 #16.安装PyCharm
 su - root
 cd /opt/
-wget https://download.jetbrains.com/python/pycharm-community-2017.3.3.tar.gz
-tar -zxf pycharm-community-2017.3.3.tar.gz
+wget https://download.jetbrains.com/python/pycharm-community-2018.1.4.tar.gz
+tar -zxf pycharm-community-2018.1.4.tar.gz
 cd ~
-ln -s /opt/pycharm-community-2017.3.3/bin/pycharm.sh ~/pycharm.sh 
+ln -s /opt/pycharm-community-2018.1.4/bin/pycharm.sh ~/pycharm.sh 
 
 #17.root用户登录Gnome桌面,打开terminal执行命令
 ~/pycharm.sh 
