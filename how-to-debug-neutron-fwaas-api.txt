@@ -40,8 +40,8 @@ neutron-db-manage --subproject neutron-fwaas upgrade head
 
 
 #获取token
-source keystonerc_admin;TOKEN=$(openstack token issue | grep '^| id' | awk '{print$4}')
-source keystonerc_demo;TOKEN=$(openstack token issue | grep '^| id' | awk '{print$4}')
+source ~/keystonerc_admin;TOKEN=$(openstack token issue -f value -c id)
+#source ~/keystonerc_demo;TOKEN=$(openstack token issue -f value -c id)
 
 ##############ADDRESS GROUP
 ##增CREATE

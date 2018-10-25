@@ -1,25 +1,49 @@
-﻿#YUM设置代理
+﻿#YUM源设置全局代理
 cat << EOF >> /etc/yum.conf
-proxy=http://HOST_IP:1080/
+proxy=http://IP_ADDR:1080/
+EOF
+
+#YUM特定源设置代理
+cat << EOF > /etc/yum.repos.d/epel.repo
+[epel]
+name=Extra Packages for Enterprise Linux 7 - $basearch
+baseurl=http://mirrors.ustc.edu.cn/epel/7/$basearch
+failovermethod=priority
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+proxy=http://IP_ADDR:1080/
+EOF
+
+#YUM特定源设置不代理
+cat << EOF > /etc/yum.repos.d/local.repo
+[centos74]
+name=CentOS-7 - Everything - 1708
+baseurl=http://YUM_IP_ADDR/centos74/
+gpgcheck=1
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+proxy=_none_
 EOF
 
 #GIT代理设置
-git config --global http.proxy http://HOST_IP:1080
-git config --global https.proxy http://HOST_IP:1080
+git config --global http.proxy http://IP_ADDR:1080
+git config --global https.proxy http://IP_ADDR:1080
 
 #PIP代理及源设置
 cat << EOF > ~/.pip/pip.conf
 [global]
 index-url = https://mirrors.ustc.edu.cn/pypi/web/simple
 format = columns
-proxy = http://HOST_IP:1080
+proxy = http://IP_ADDR:1080
 EOF
 
 
 #设置全局代理(不建议，可能会导致本地网络不能正常访问的问题)
 cat << EOF >> /etc/profile
-export http_proxy=HOST_IP:1080
-export https_proxy=HOST_IP:1080
+export http_proxy=http://IP_ADDR:1080
+export https_proxy=http://IP_ADDR:1080
+export no_proxy=127.0.0.1,localhost,IP_ADDR
 EOF
 #取消全局代理
 sed -i "s/^export http/#export http/" /etc/profile
