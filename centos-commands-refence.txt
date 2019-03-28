@@ -14,10 +14,7 @@ PIDFile=/root/.vnc/%H%i.pid
 systemctl daemon-reload #重新加载systemd服务配置文件
 vncpasswd #设置当前用户密码
 systemctl start vncserver@:1
-#防火墙放行TCP 5901端口
-firewall-cmd --permanent --add-service vnc-server
-systemctl restart firewalld.service
-#或直接禁用防火墙
+#防火墙放行TCP 5901端口或直接禁用防火墙
 systemctl stop firewalld
 systemctl disable firewalld
 
