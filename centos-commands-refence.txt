@@ -1,0 +1,24 @@
+##CentOS安装VNC
+yum -y install @x11 @gnome tigervnc-server
+yum -y remove gnome-initial-setup #取消GNOME引导设置程序
+yum -y remove  PackageKit #取消YUM源后台自动更新
+systemctl set-default graphical #设置默认启动runlevel 5
+systemctl isolate graphical.target #启动runlevel5
+systemctl enable vncserver@:1 #对应端口号5901,注意避免与虚拟机端口号冲突
+#修改service文件，以root用户为例
+vim /etc/systemd/system/multi-user.target.wants/vncserver\@\:1.service
+ExecStart=/usr/sbin/runuser -l root -c "/usr/bin/vncserver %i"
+PIDFile=/root/.vnc/%H%i.pid
+
+systemctl daemon-reload #重新加载systemd服务配置文件
+vncpasswd #设置当前用户密码
+systemctl start vncserver@:1
+
+#下载并安装vnc client
+https://www.tightvnc.com/download.html
+#输入ip:port 连接服务器，防火墙请放行5901端口
+#例:192.168.122.128:5901
+#调整分辨率Applications>System Tools>Settings>Devices>Displays>Desolution
+#禁用黑屏Applications>System Tools>Settings>Power>Blank screen
+
+
