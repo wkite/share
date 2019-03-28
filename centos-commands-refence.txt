@@ -1,4 +1,5 @@
 ##CentOS安装VNC
+#可参考https://linux.cn/article-5335-1.html
 yum -y install @x11 @gnome tigervnc-server
 yum -y remove gnome-initial-setup #取消GNOME引导设置程序
 yum -y remove  PackageKit #取消YUM源后台自动更新
