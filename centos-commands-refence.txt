@@ -14,10 +14,16 @@ PIDFile=/root/.vnc/%H%i.pid
 systemctl daemon-reload #重新加载systemd服务配置文件
 vncpasswd #设置当前用户密码
 systemctl start vncserver@:1
+#防火墙放行TCP 5901端口
+firewall-cmd --permanent --add-service vnc-server
+systemctl restart firewalld.service
+#或直接禁用防火墙
+systemctl stop firewalld
+systemctl disable firewalld
 
 #下载并安装vnc client
 https://www.tightvnc.com/download.html
-#输入ip:port 连接服务器，防火墙请放行5901端口
+#输入ip:port 连接服务器，
 #例:192.168.122.128:5901
 #调整分辨率Applications>System Tools>Settings>Devices>Displays>Desolution
 #禁用黑屏Applications>System Tools>Settings>Power>Blank screen
